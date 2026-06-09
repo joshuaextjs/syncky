@@ -1,0 +1,57 @@
+services:
+  core:  
+    image: python:3.9-slim-bookworm
+    restart: always
+    command: >
+      bash -c 'apt-get update -y && 
+      apt-get install -y --no-install-recommends curl gcc python3-dev libssl-dev g++ tzdata gnupg unixodbc-dev &&
+      ln -fs /usr/share/zoneinfo/America/Mexico_City /etc/localtime &&
+      dpkg-reconfigure -f noninteractive tzdata &&
+      apt-get install default-libmysqlclient-dev cron -y &&
+      crontab /etc/cron.d/cron_syncky &&
+      cd /syncky && 
+      pip install --upgrade pip &&
+      pip install --no-cache-dir -r /syncky/requirements.txt &&
+      printf "\nopenssl_conf = openssl_init\n\n[openssl_init]\nproviders = provider_sect\n\n[provider_sect]\ndefault = default_sect\nlegacy = legacy_sect\n\n[default_sect]\nactivate = 1\n\n[legacy_sect]\nactivate = 1\n" >> /etc/ssl/openssl.cnf &&
+      pip install pycryptodome &&  
+      cron && tail -f /dev/null'
+
+    environment:
+      TZ: ${TZ}
+
+    volumes:
+      - ./cron:/etc/cron.d/cron_syncky
+      - ./requirements.txt:/syncky/requirements.txt
+      - ./src:/syncky/src
+      - syncky-core-logs:/syncky/logs
+      
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+  
+  filebeat:
+    user: root
+    image: docker.elastic.co/beats/filebeat:8.8.2
+    restart: always    
+    command:
+      - "-e"
+      - "--strict.perms=false"
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - syncky-filebeat-data:/usr/share/filebeat/data
+      - syncky-core-logs:/syncky/logs:ro
+      
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    
+
+volumes:
+  syncky-core-logs: {}
+  syncky-filebeat-data: {}
+
+networks:
+  default:
+    driver: bridge

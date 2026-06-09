@@ -1,0 +1,8 @@
+20 9 * * * /usr/local/bin/python /syncky/src/main.py > /syncky/logs/syncky.out 2>/syncky/logs/syncky.err
+5 13 * * * /usr/local/bin/python /syncky/src/main.py > /syncky/logs/syncky.out 2>/syncky/logs/syncky.err
+
+5 9 * * * /usr/local/bin/python /syncky/src/scripts/remote_admin.py farivi-power-on > /syncky/logs/remote-admin.out 2>/syncky/logs/remote-admin.err
+30 9 * * * /usr/local/bin/python /syncky/src/scripts/remote_admin.py farivi-power-off > /syncky/logs/remote-admin.out 2>/syncky/logs/remote-admin.err
+
+55 12 * * * /usr/local/bin/python /syncky/src/scripts/remote_admin.py farivi-power-on > /syncky/logs/remote-admin.out 2>/syncky/logs/remote-admin.err
+15 13 * * * /usr/local/bin/python /syncky/src/scripts/remote_admin.py farivi-power-off > /syncky/logs/remote-admin.out 2>/syncky/logs/remote-admin.err
